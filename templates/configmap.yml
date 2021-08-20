@@ -1,0 +1,60 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name | lower }}-config
+  namespace: {{ .Release.Namespace }}
+data:
+{{- if .Values.kubesvcyml }}
+ kubesvc.yml: |
+{{ .Values.kubesvcyml | indent 2}}
+{{- else }}
+ kubesvc.yml: |    
+    hub:
+      connection:        
+        grpc: {{ .Values.grpcUrl }}        
+        {{- if not .Values.tls }}
+        insecure: true
+        {{- else}}
+        tls:
+        {{- range $key, $val := .Values.tls }}
+          {{ $key }}: {{ $val }}        
+        {{- end }}
+        {{- end }}
+      {{- if .Values.cloudEnabled }}
+      auth:
+        armory:
+          clientId: {{ .Values.clientId | default "" }}
+          secret: {{ .Values.secret | default "" }}
+          tokenIssuerUrl: {{ .Values.tokenIssuerUrl | default  "https://auth.cloud.armory.io/oauth/token" }}
+          audience: {{ .Values.audience | default "https://api.cloud.armory.io" }}
+          verify: true
+      {{- end }}
+
+    {{- with .Values.kubernetes }}
+    kubernetes:
+      accounts:      
+      {{- range $index, $account := .accounts }}
+      - name: {{ $account.name }}
+        {{- range $key, $val := $account -}}
+        {{- if not (or (eq $key "serviceAccount") (eq $key "kubeconfigFile")) }}        
+        {{- if and (eq $key "namespaces") $account.onlyNamespacedResources }}
+        namespaces: {{ $account.namespaces }}
+        {{- else if (eq $key "customResourceDefinitions") }}
+        customResourceDefinitions:
+        {{- range $in, $crd := $account.customResourceDefinitions }}
+        - kind: {{ $crd.kind }}
+        {{- end }}
+        {{- else if not (eq $key "name")}}
+        {{ $key }}: {{ $val }}
+        {{- end -}}
+        {{- end -}}
+      {{- end -}}
+        {{- if or (eq $.Values.mode "agent") $account.serviceAccount }}
+        serviceAccount: true
+        {{- else }}
+        kubeconfigFile: /.kube/config
+        {{- end }}
+      {{- end -}}
+    {{- end -}}
+{{- end }}

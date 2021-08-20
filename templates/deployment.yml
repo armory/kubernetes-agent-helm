@@ -1,0 +1,73 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: spin
+    app.kubernetes.io/name: kubesvc
+    app.kubernetes.io/part-of: spinnaker
+    cluster: {{ .Release.Name | lower }}-cluster
+  name: {{ .Release.Name | lower }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: spin
+      cluster: {{ .Release.Name | lower }}-cluster
+  template:
+    metadata:
+      labels:
+        app: spin
+        app.kubernetes.io/name: kubesvc
+        app.kubernetes.io/part-of: spinnaker
+        cluster: {{ .Release.Name | lower }}-cluster
+    spec:
+      serviceAccount: {{ .Release.Name | lower }}-sa
+      {{- if .Values.imagePullSecrets }}
+      imagePullSecrets:
+      - name: {{ .Values.imagePullSecrets }}
+      {{- end }}
+      containers:
+      - image: armory/kubesvc:0.6.0-rc.40
+        imagePullPolicy: IfNotPresent
+        name: kubesvc        
+        {{- if .Values.cloudEnabled }}
+        env:
+        - name: ARMORY_HUB
+          value: "true"
+        {{- end }}
+        ports:
+          - name: health
+            containerPort: 8082
+            protocol: TCP
+          - name: metrics
+            containerPort: 8008
+            protocol: TCP
+        readinessProbe:
+          httpGet:
+            port: health
+            path: /health
+          failureThreshold: 3
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 1
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /opt/spinnaker/config
+          name: volume-{{ .Release.Name | lower }}-config
+        {{- if not (eq $.Values.mode "agent") }}
+        - mountPath: /.kube/
+          name: volume-{{ .Release.Name | lower }}-kubeconfigs
+        {{- end}}
+      restartPolicy: Always
+      volumes:
+      - name: volume-{{ .Release.Name | lower }}-config
+        configMap:
+          name: {{ .Release.Name | lower }}-config
+      {{- if not (eq $.Values.mode "agent") }}
+      - name: volume-{{ .Release.Name | lower }}-kubeconfigs
+        secret:
+          defaultMode: 420
+          secretName: {{ .Release.Name | lower }}-secret
+      {{- end }}

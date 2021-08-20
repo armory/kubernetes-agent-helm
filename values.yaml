@@ -1,0 +1,22 @@
+grpcUrl:  spin-clouddriver-grpc:9091
+mode: infrastructure
+cloudEnabled: false
+kubernetes:
+  accounts:
+  - name: daniel-dev2    
+    timeoutSeconds: 32
+    namespaces: ["daniel-dev"]
+    onlyNamespacedResources: true
+    customResourceDefinitions:
+    - kind: DaiquiriApplicationConfig.daiquiri.itunes.apple.com
+
+clientId: ""
+secret: ""
+tokenIssuerUrl: https://auth.staging.cloud.armory.io/oauth/token
+audience: https://api.staging.cloud.armory.io
+
+# tls:
+#   insecureSkipVerify: true 
+#   clientKeyFile: /Users/daniel/develop/engineering-toolset/spinnaker/scripts/agent/client.key
+#   clientCertFile: /Users/daniel/develop/engineering-toolset/spinnaker/scripts/agent/client.crt
+#   cacertFile: /Users/daniel/develop/engineering-toolset/spinnaker/scripts/agent/ca.crt
