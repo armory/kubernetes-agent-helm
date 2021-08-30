@@ -57,7 +57,7 @@ spec:
         - mountPath: /opt/spinnaker/config
           name: volume-{{ .Release.Name | lower }}-config
         {{- if not (eq $.Values.mode "agent") }}
-        - mountPath: /.kube/
+        - mountPath: /kubeconfigfiles
           name: volume-{{ .Release.Name | lower }}-kubeconfigs
         {{- end}}
       restartPolicy: Always

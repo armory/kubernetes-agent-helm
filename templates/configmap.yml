@@ -13,9 +13,10 @@ data:
     hub:
       connection:        
         grpc: {{ .Values.grpcUrl }}        
-        {{- if not .Values.tls }}
+        {{- if .Values.insecure }}
         insecure: true
-        {{- else}}
+        {{- end}}
+        {{- if .Values.tls}}
         tls:
         {{- range $key, $val := .Values.tls }}
           {{ $key }}: {{ $val }}        
@@ -35,7 +36,11 @@ data:
     kubernetes:
       accounts:      
       {{- range $index, $account := .accounts }}
+      {{- if eq $index 0 }}
+      - name: {{ required "At least one account name must be specified, use: --set accountName=..." $.Values.accountName }}
+      {{- else }}
       - name: {{ $account.name }}
+      {{- end }}
         {{- range $key, $val := $account -}}
         {{- if not (or (eq $key "serviceAccount") (eq $key "kubeconfigFile")) }}        
         {{- if and (eq $key "namespaces") $account.onlyNamespacedResources }}
@@ -53,7 +58,7 @@ data:
         {{- if or (eq $.Values.mode "agent") $account.serviceAccount }}
         serviceAccount: true
         {{- else }}
-        kubeconfigFile: /.kube/config
+        kubeconfigFile: /kubeconfigfiles/config
         {{- end }}
       {{- end -}}
     {{- end -}}
