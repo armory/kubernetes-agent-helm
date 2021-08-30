@@ -1,5 +1,5 @@
 apiVersion: v2
-name: kubesvc-beta
+name: agent-k8s
 description: An easy way to install armory's agent for kubernetes
 
 type: application
