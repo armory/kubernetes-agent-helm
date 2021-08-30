@@ -25,8 +25,8 @@ data:
       {{- if .Values.cloudEnabled }}
       auth:
         armory:
-          clientId: {{ .Values.clientId | default "" }}
-          secret: {{ .Values.secret | default "" }}
+          clientId: {{ required "clientId must be specified if using cloudEnabled=true" .Values.clientId }}
+          secret: {{ required "clientSecret must be specified if using cloudEnabled=true" .Values.clientSecret }}
           tokenIssuerUrl: {{ .Values.tokenIssuerUrl | default  "https://auth.cloud.armory.io/oauth/token" }}
           audience: {{ .Values.audience | default "https://api.cloud.armory.io" }}
           verify: true

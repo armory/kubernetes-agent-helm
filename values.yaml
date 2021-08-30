@@ -3,9 +3,4 @@ mode: agent
 cloudEnabled: true
 kubernetes:
   accounts:
-  - name: account1     
-
-clientId: "bv6i8Yi6EMME8UNx3BaiJdp6Wir91WZI"
-secret: "eKuUnYuDLDqPI5Ds65AIGywywYGrLlPDIETM4Q-G45YPJFK98AHvFb-w5eLFpSL1"
-tokenIssuerUrl: https://auth.staging.cloud.armory.io/oauth/token
-audience: https://api.staging.cloud.armory.io
+  - name: account1
