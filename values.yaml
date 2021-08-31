@@ -1,4 +1,4 @@
-grpcUrl:  agents.staging.cloud.armory.io:443
+grpcUrl:  agents.cloud.armory.io:443
 mode: agent
 cloudEnabled: true
 kubernetes:
