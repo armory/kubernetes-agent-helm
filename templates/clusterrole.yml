@@ -94,6 +94,12 @@ rules:
   - validatingwebhookconfigurations
   verbs:
   - '*'
+- apiGroups:
+  - argoproj.io
+  resources:
+  - '*'
+  verbs:
+  - '*'
 ---
 apiVersion: v1
 kind: ServiceAccount
