@@ -21,7 +21,7 @@ The main intention with this project is to provide an easy way of installing arm
 > The release name is used across some of the kubernetes resources that get created, you can also add `--set imagePullSecrets=something` to use  docker registry credentials
 
 ## Quick Installation
-> Note: you can also replace `helm install` by `helm template` in the below commands to get an output of the kubernetes manifests that are rendered e.g: `helm template kubesvc ...`
+> Note: you can also replace `helm install` by `helm template` in the below commands to get an output of the kubernetes manifests that are rendered e.g: `helm template armory-agent ...`
 
 Create a namespace where the agent will be installed:
 
@@ -39,11 +39,11 @@ aws eks update-kubeconfig --name <target_cluster>
 ### Agent mode:
 From the root of the chart project:
 ```
-helm install kubesvc . --set mode=agent,clientId=<your-clientId>,secret=<your/secret> --namespace=dev
+helm install armory-agent . --set mode=agent,clientId=<your-clientId>,secret=<your/secret> --namespace=dev
 ```
 ### Infrastructure mode
 ```
-helm install kubesvc . --set-file kubeconfig=$HOME/develop/config --set clientId=<your-clientId>,secret=<your/secret> --namespace=dev
+helm install armory-agent . --set-file kubeconfig=$HOME/develop/config --set accountName=<your-accountName>,clientId=<your-clientId>,secret=<your/secret> --namespace=dev
 ```
 
 > Note: if `cloudEnabled` is set to false there is no need to provide clientId and secret but you need to set clouddriver's grpc host in `grpcUrl` such as `--set grpcUrl= localhost:9090`
@@ -52,7 +52,7 @@ helm install kubesvc . --set-file kubeconfig=$HOME/develop/config --set clientId
 
 You can also install using your own agent settings file if you would like greater flexibility:
 ```
-helm template kubesvc . --set-file kubeconfig=$HOME/develop/config,kubesvcyml=/Users/armory/.spinnaker/kubesvc-local-hub.yml --namespace=dev
+helm template armory-agent . --set-file kubeconfig=$HOME/develop/config,agentyml=/Users/armory/.spinnaker/agent-local-hub.yml --namespace=dev
 ```
 > Note: make sure that your `kubeconfigFile` in your settings file matches the kubeconfig set in the 'kubeconfig' variable if not running with `serviceAccount: true`
 
