@@ -5,11 +5,11 @@ metadata:
   name: {{ .Release.Name | lower }}-config
   namespace: {{ .Release.Namespace }}
 data:
-{{- if .Values.kubesvcyml }}
- kubesvc.yml: |
-{{ .Values.kubesvcyml | indent 2}}
+{{- if .Values.agentyml }}
+ armory-agent.yml: |
+{{ .Values.agentyml | indent 2}}
 {{- else }}
- kubesvc.yml: |    
+ armory-agent.yml: |    
     hub:
       connection:        
         grpc: {{ .Values.grpcUrl }}        
