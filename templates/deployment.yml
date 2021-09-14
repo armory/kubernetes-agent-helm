@@ -29,10 +29,20 @@ spec:
       - image: armory/agent-k8s:{{ .Chart.AppVersion }}
         imagePullPolicy: IfNotPresent
         name: agent
-        {{- if .Values.cloudEnabled }}
         env:
+        {{- if .Values.cloudEnabled }}
         - name: ARMORY_HUB
           value: "true"
+        {{- end }}
+        {{- with .Values.env }}
+        {{- /* Unfortunately this loop can't validate that the map has a name
+               and value structure. If name or value is mispelled, then it will
+               fail silently and create an invalid env structure.
+           */}}
+        {{- range . }}
+        - name: {{ index . "name" }}
+          value: {{ index . "value" }}
+        {{- end }}
         {{- end }}
         ports:
           - name: health
