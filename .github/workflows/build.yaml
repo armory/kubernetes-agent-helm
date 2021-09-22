@@ -1,0 +1,42 @@
+name: Create Helm Package After Agent Release
+on:
+  repository_dispatch:
+    types: [agentRelease]
+jobs:
+  createHelmPackage:
+    runs-on: ubuntu-latest
+    env:
+      HELM_URL: https://get.helm.sh
+      HELM_VERSION: 3.1.1
+      HELM_TARBALL: helm-v${HELM_VERSION}-linux-amd64.tar.gz
+      HELM_INSTALLATION_FOLDER: ~/helm
+      HELM_HOME: ${HELM_INSTALLATION_FOLDER}/linux-amd64
+      ARMORY_JFROG_CHARTS_URL: https://armory.jfrog.io/artifactory/charts
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+      - name: Install Helm
+        run: |
+          set -eu
+          echo "Installing Helm..."
+          [ -d ${{env.HELM_INSTALLATION_FOLDER}} ] || mkdir ${{env.HELM_INSTALLATION_FOLDER}}
+          cd ${{env.HELM_INSTALLATION_FOLDER}}
+          curl -f --user-agent curl-ci-sync -sSL -o "${{env.HELM_TARBALL}}" "${{env.HELM_URL}}/${{env.HELM_TARBALL}}"
+          tar -xzf "${{env.HELM_TARBALL}}"
+      - name: Publish Agent Helm Package
+        run: |
+          set -eu
+          echo "Publising agent helm chart..."
+          PATH="${{env.HELM_HOME}}/:${PATH}"
+          sed 's/{{version}}/${{github.event.client_payload.version}}/' Chart.yaml > ChartTemp.yaml
+          mv ChartTemp.yaml Chart.yaml
+          sed 's/{{appVersion}}/${{github.event.client_payload.appVersion}}/' Chart.yaml > ChartTemp.yaml
+          mv ChartTemp.yaml Chart.yaml
+          [ -d helm ] || mkdir helm
+          cd helm
+          helm package ../
+          curl -f -u ${{secrets.JFROG_USER}}:${{secrets.JFROG_PASSWORD}} -o "index.yaml" "${{env.ARMORY_JFROG_CHARTS_URL}}/index.yaml"
+          helm repo index --merge index.yaml --url "${{env.ARMORY_JFROG_CHARTS_URL}}" .
+          for f in *; do
+            curl -f -u ${{secrets.JFROG_USER}}:${{secrets.JFROG_PASSWORD}} -X PUT "${{env.ARMORY_JFROG_CHARTS_URL}}/${f}" -T "${PWD}/${f}"
+          done

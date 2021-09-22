@@ -65,6 +65,26 @@ This chart also supports passing of settings using helm variables present in the
 | cloudEnabled | `true` |
 | kubernetes | refer to Kubernetes specific options in [armory.io](https://docs.armory.io/docs/armory-agent/agent-options/#configuration-options) |
 
+## GitHub Actions
+
+### Create Helm Package After Agent Release
+
+This workflow is exposed by GitHub API, and it basically creates and publish the agent-k8s component
+into a helm package. 
+
+It was meant to be use by [armory-io/agent-k8s](https://github.com/armory-io/agent-k8s/blob/5b914180aea2602f0a6152e34194463b26b45177/.github/workflows/build.yml) 
+workflow when there is a new release of it, but we always can trigger it by calling the GitHub API.
+
+Calling GitHub API using curl command:
+
+```
+    curl -X POST \
+        -H "Accept: application/vnd.github.v3+json" \
+        -H "Authorization: token {GIT_HUB_TOKEN}" \
+        https://api.github.com/repos/{REPOSITORY_OWNER}/{REPOSITORY_NAME}/dispatches \
+        -d '{"event_type":"agentRelease", "client_payload":{"version":"{AGENT_VERSION}"}}'
+```
+
 ## License
 
 © 2021 Armory Inc. All rights reserved.
