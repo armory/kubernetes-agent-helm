@@ -82,7 +82,7 @@ Calling GitHub API using curl command:
         -H "Accept: application/vnd.github.v3+json" \
         -H "Authorization: token {GIT_HUB_TOKEN}" \
         https://api.github.com/repos/{REPOSITORY_OWNER}/{REPOSITORY_NAME}/dispatches \
-        -d '{"event_type":"agentRelease", "client_payload":{"version":"{AGENT_VERSION}"}}'
+        -d '{"event_type":"agentRelease", "client_payload":{"version":"{HELM_VERSION}", "appVersion":"{AGENT_VERSION}"}}'
 ```
 
 ## License
