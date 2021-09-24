@@ -1,5 +1,5 @@
 apiVersion: v2
-name: agent-k8s
+name: agent-k8s-test
 description: An easy way to install armory's agent for kubernetes
 
 type: application
