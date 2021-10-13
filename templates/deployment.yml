@@ -20,7 +20,9 @@ spec:
         app.kubernetes.io/name: armory-agent
         cluster: {{ .Release.Name | lower }}-cluster
     spec:
+      {{- if (eq $.Values.mode "agent") }}
       serviceAccount: {{ .Release.Name | lower }}-sa
+      {{- end }}
       {{- if .Values.imagePullSecrets }}
       imagePullSecrets:
       - name: {{ .Values.imagePullSecrets }}
@@ -64,18 +66,18 @@ spec:
         volumeMounts:
         - mountPath: /opt/armory/config
           name: volume-{{ .Release.Name | lower }}-config
-        {{- if not (eq $.Values.mode "agent") }}
+        {{- with .Values.accounts }}
         - mountPath: /kubeconfigfiles
-          name: volume-{{ .Release.Name | lower }}-kubeconfigs
-        {{- end}}
+          readOnly: true
+          name: {{ template "kubeconfig-volume-name" $.Release }}
+        {{- end }}
       restartPolicy: Always
       volumes:
       - name: volume-{{ .Release.Name | lower }}-config
         configMap:
           name: {{ .Release.Name | lower }}-config
-      {{- if not (eq $.Values.mode "agent") }}
-      - name: volume-{{ .Release.Name | lower }}-kubeconfigs
+      {{- with $.Values.accounts }}
+      - name: {{ template "kubeconfig-volume-name" $.Release }}
         secret:
-          defaultMode: 420
-          secretName: {{ .Release.Name | lower }}-secret
+          secretName: {{ template "kubeconfig-secret-name" $.Release }}
       {{- end }}
