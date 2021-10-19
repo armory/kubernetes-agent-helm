@@ -28,42 +28,53 @@ Create a namespace where the agent will be installed:
 ```sh
 kubectl create namespace dev
 ```
-With the selected AWS profile that has access to the target cluster Create a kubeconfig file
-> Note: skip this in case the agent is set to run in 'agent' mode 
 
-```sh
-aws eks update-kubeconfig --name <target_cluster> 
-```
-
+> Note: if `cloudEnabled` is set to false there is no need to provide clientId
+> and clientSecret in the following examples. You will, however, need to set
+> clouddriver's grpc host in `grpcUrl` such as `--set grpcUrl= localhost:9090`
 
 ### Agent mode:
 From the root of the chart project:
 ```
-helm install armory-agent . --set mode=agent,clientId=<your-clientId>,secret=<your/secret> --namespace=dev
+helm install armory-agent . --set mode=agent,clientId=<your-clientId>,clientSecret=<your/secret> --namespace=dev
 ```
+
 ### Infrastructure mode
-```
-helm install armory-agent . --set-file kubeconfig=$HOME/develop/config --set accountName=<your-accountName>,clientId=<your-clientId>,secret=<your/secret> --namespace=dev
+
+This mode allows you to configure multiple Kubernetes clusters managed by a
+single agent installation.
+
+```shell
+helm install armory-agent armory/agent-k8s \
+  --namespace=dev \
+  # NOTE: you can also embed your kubeconfig in the values.yaml file for cleaner
+  #       definition. See the values.yaml file in this project for an example.
+  --set-file accounts[0].kubeconfig=$HOME/develop/config \
+  --set mode=infrastructure,\
+        clientId=<your-clientId>,\
+        clientSecret=<your/secret>
 ```
 
-> Note: if `cloudEnabled` is set to false there is no need to provide clientId and secret but you need to set clouddriver's grpc host in `grpcUrl` such as `--set grpcUrl= localhost:9090`
+## Chart Values
 
-## Custom settings installation
+| Key | Type | Default | Description |
+| ------ | ------ | ------ | ------ |
+| `mode` | string | `agent` | Required. The mode the agent will run in. Either `agent` or `infrastructure`. |
+| `grpcUrl` | string | `agents.cloud.armory.io:443` | Required. The URL to connect to Armory Cloud. |
+| `cloudEnabled` | bool | `true` | Whether this agent will talk to Armory Cloud, or an in-cluster Armory Enterprise instance. |
+| `clientId` | string | null | Client ID surfaced when [registering your Armory Cloud instance][ac-registration]. Required if cloudEnabled is true. |
+| `clientSecret` | string | null | Client Secret surfaced when [registering your Armory Cloud instance][ac-registration]. Required if cloudEnabled is true. |
+| `accountName` | string | null | Name of the account this agent is monitoring. Required if mode is set to 'agent'. |
+| `accounts` | list | null | Configure multiple Kubernetes accounts when running in infrastructure mode. Refer to Kubernetes specific options [here](https://docs.armory.io/docs/armory-agent/agent-options/#configuration-options). Required if mode is set to 'infrastructure'. |
+| `env` | list | null | Optional. Configure additional environment variables for the agent. |
 
-You can also install using your own agent settings file if you would like greater flexibility:
-```
-helm template armory-agent . --set-file kubeconfig=$HOME/develop/config,agentyml=/Users/armory/.spinnaker/agent-local-hub.yml --namespace=dev
-```
-> Note: make sure that your `kubeconfigFile` in your settings file matches the kubeconfig set in the 'kubeconfig' variable if not running with `serviceAccount: true`
+[ac-registration]: https://docs.armory.io/docs/installation/ae-environment-reg/
 
-This chart also supports passing of settings using helm variables present in the values.yml
-| Option | Default |
-| ------ | ------ |
-| grpcUrl | `agents.cloud.armory.io:443` |
-| clientId | null |
-| secret | null |
-| cloudEnabled | `true` |
-| kubernetes | refer to Kubernetes specific options in [armory.io](https://docs.armory.io/docs/armory-agent/agent-options/#configuration-options) |
+## Further customization
+
+If you'd like complete control over the agent's configuration we recommend
+using the `armory-k8s-full` chart which can be found
+[here](https://github.com/armory-io/agent-k8s/tree/master/deploy/charts/armory-k8s-full).
 
 ## GitHub Actions
 
@@ -88,4 +99,3 @@ Calling GitHub API using curl command:
 ## License
 
 © 2021 Armory Inc. All rights reserved.
-
