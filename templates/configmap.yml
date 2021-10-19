@@ -32,34 +32,36 @@ data:
           verify: true
       {{- end }}
 
-    {{- with .Values.kubernetes }}
+    {{- if .Values.accounts }}
     kubernetes:
-      accounts:      
-      {{- range $index, $account := .accounts }}
-      {{- if eq $index 0 }}
-      - name: {{ required "At least one account name must be specified, use: --set accountName=..." $.Values.accountName }}
-      {{- else }}
-      - name: {{ $account.name }}
-      {{- end }}
-        {{- range $key, $val := $account -}}
-        {{- if not (or (eq $key "serviceAccount") (eq $key "kubeconfigFile")) }}        
-        {{- if and (eq $key "namespaces") $account.onlyNamespacedResources }}
-        namespaces: {{ $account.namespaces }}
-        {{- else if (eq $key "customResourceDefinitions") }}
-        customResourceDefinitions:
-        {{- range $in, $crd := $account.customResourceDefinitions }}
-        - kind: {{ $crd.kind }}
-        {{- end }}
-        {{- else if not (eq $key "name")}}
-        {{ $key }}: {{ $val }}
-        {{- end -}}
-        {{- end -}}
-      {{- end -}}
-        {{- if or (eq $.Values.mode "agent") $account.serviceAccount }}
-        serviceAccount: true
-        {{- else }}
-        kubeconfigFile: /kubeconfigfiles/config
-        {{- end }}
-      {{- end -}}
-    {{- end -}}
+      accounts:
+      {{- range .Values.accounts }}
+        - name: {{ .name }}
+          kubeconfigFile: /kubeconfigfiles/{{ $.Release.Name | lower }}-{{ .name }}
+          {{- if .onlyNamespacedResources }}
+          onlyNamespacedResources: {{ .onlyNamespacedResources }}
+          namespaces: {{ .namespaces }}
+          {{- end }}
+          {{- with .omitNamespaces }}
+          omitNamespaces: {{ . }}
+          {{- end }}
+          {{- with .customResourceDefinitions }}
+          customResourceDefinitions:
+            {{- range . }}
+            - kind: {{ . }}
+            {{- end}}
+          {{- end }}
+          {{- with .kinds }}
+          kinds: {{ . }}
+          {{- end }}
+          {{- with .omitKinds }}
+          omitKinds: {{ . }}
+          {{- end }}
+      {{- end}}
+    {{- else }}
+    kubernetes:
+      accounts:
+        - name: {{ required "`accountName` must be defined when using 'agent' mode." $.Values.accountName }}
+          serviceAccount: true
+    {{- end }}
 {{- end }}

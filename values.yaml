@@ -1,8 +1,41 @@
 grpcUrl:  agents.cloud.armory.io:443
 mode: agent
 cloudEnabled: true
-kubernetes:
-  accounts:
-  - name: account1
-
 env: []
+
+# Examples
+
+## NOTE: If you are installing the agent in "agent mode" then you must set an
+## account name. This name will be used in the Spinnaker Aurora plugin.
+# accountName: my-cluster
+
+## NOTE: The following settings will enable the agent to run in
+## "infrastructure mode", which allows the definition of multiple remote
+## Kubernetes accounts for a single agent.
+#mode: infrastructure
+#accounts:
+  #- name: my-remote-account
+    ## NOTE: `kubeconfig` can also be set at invocation time with --set-file if
+    ## you do not wish to embed it in your values.yaml file.
+    ##
+    ## NOTE: if you do not already have a kubeconfig file for your target cluster,
+    ##       you can create one with the following instructions:
+    ##       https://docs.armory.io/docs/armory-admin/manual-service-account/
+    #kubeconfig: |
+      #apiVersion: v1
+      #kind: Config
+      #clusters:
+      #- cluster:
+          #certificate-authority-data: example
+          #server: https://example.com
+        #name: example-cluster
+      #contexts:
+      #- context:
+          #cluster: example-cluster
+          #user: example-user
+        #name: example-cluster
+      #current-context: example-cluster
+      #users:
+      #- name: example-user
+        #user:
+          #token: my-token
