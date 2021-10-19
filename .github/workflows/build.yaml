@@ -28,8 +28,6 @@ jobs:
           set -eu
           echo "Publising agent helm chart..."
           PATH="${{env.HELM_HOME}}/:${PATH}"
-          sed 's/{{version}}/${{github.event.client_payload.version}}/' Chart.yaml > ChartTemp.yaml
-          mv ChartTemp.yaml Chart.yaml
           sed 's/{{appVersion}}/${{github.event.client_payload.appVersion}}/' Chart.yaml > ChartTemp.yaml
           mv ChartTemp.yaml Chart.yaml
           [ -d helm ] || mkdir helm
