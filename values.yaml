@@ -3,6 +3,16 @@ mode: agent
 cloudEnabled: true
 env: []
 
+# Additional labels to add to the pods:
+# podLabels:
+#   key: value
+podLabels: {}
+
+# Additional annotations for pods
+# podAnnotations:
+#   key: value
+podAnnotations: {}
+
 # Examples
 
 ## NOTE: If you are installing the agent in "agent mode" then you must set an
