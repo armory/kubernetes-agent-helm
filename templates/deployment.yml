@@ -19,6 +19,17 @@ spec:
         app: armory-agent
         app.kubernetes.io/name: armory-agent
         cluster: {{ .Release.Name | lower }}-cluster
+{{- if .Values.podLabels}}
+      {{- range $key, $value := .Values.podLabels }}
+        {{ $key }}: {{ $value | quote }}
+      {{- end }}
+{{- end }}
+{{- if .Values.podAnnotations}}
+      annotations:
+      {{- range $key, $value := .Values.podAnnotations }}
+        {{ $key }}: {{ $value | quote }}
+      {{- end }}
+{{- end }}
     spec:
       {{- if (eq $.Values.mode "agent") }}
       serviceAccount: {{ .Release.Name | lower }}-sa
