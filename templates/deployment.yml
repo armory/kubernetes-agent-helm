@@ -39,7 +39,11 @@ spec:
       - name: {{ .Values.imagePullSecrets }}
       {{- end }}
       containers:
+      {{- if .Values.image}}
+      - image: {{ .Values.image }}
+      {{- else }}
       - image: armory/agent-k8s:{{ .Chart.AppVersion }}
+      {{- end }}
         imagePullPolicy: IfNotPresent
         name: agent
         env:
